@@ -80,7 +80,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	// suppression d'un produit au panier
 	fun removeFromCart(product: Product) {
 		viewModelScope.launch {
-			dao.deleteItem(product.id)
+			val existingItem = dao.getCartItemById(product.id)
+			if (existingItem != null) {
+				if (existingItem.quantity > 1) {
+					val updatedItem = existingItem.copy(quantity = existingItem.quantity - 1)
+					dao.insertOrUpdate(updatedItem)
+				} else {
+					dao.deleteItem(product.id)
+				}
+			}
 		}
 	}
 }

@@ -126,9 +126,11 @@ fun CartItemRow(item: CartItem, onDelete: () -> Unit) {
 fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 	val total = items.sumOf { it.price * it.quantity }
 
-	Column(modifier = Modifier
-		.fillMaxSize()
-		.padding(16.dp)) {
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(16.dp)
+	) {
 		Text(
 			"Mon Panier",
 			style = MaterialTheme.typography.headlineMedium,
