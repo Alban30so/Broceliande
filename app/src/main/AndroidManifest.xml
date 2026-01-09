@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Broceliande">
         <activity
-            android:name=".ShopActivity"
+            android:name=".ProductDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
