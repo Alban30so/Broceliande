@@ -3,11 +3,13 @@ package I5RIOC.unilasalle.broceliande
 import I5RIOC.unilasalle.broceliande.model.MainViewModel
 import I5RIOC.unilasalle.broceliande.model.Product
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,7 +45,15 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			BroceliandeTheme {
 				Surface(modifier = Modifier.fillMaxSize()) {
-					ProductListScreen(products = viewModel.productList.value)
+					ProductListScreen(
+						products = viewModel.productList.value,
+						onProductClick = { product ->
+							val intent = Intent(this, ProductDetailsActivity::class.java).apply {
+								putExtra("PRODUCT_EXTRA", product)
+							}
+							startActivity(intent)
+						}
+					)
 				}
 			}
 		}
@@ -51,7 +61,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProductListScreen(products: List<Product>) {
+fun ProductListScreen(products: List<Product>, onProductClick: (Product) -> Unit) {
+	// GridCells.Adaptive(150.dp) permet d'avoir 2 colonnes sur mobile, plus sur tablette (Responsive)
 	LazyVerticalGrid(
 		columns = GridCells.Adaptive(minSize = 160.dp),
 		contentPadding = PaddingValues(8.dp),
@@ -59,18 +70,19 @@ fun ProductListScreen(products: List<Product>) {
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		items(products) { product ->
-			ProductItem(product)
+			ProductItem(product = product, onClick = { onProductClick(product) })
 		}
 	}
 }
 
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, onClick: () -> Unit) {
 	Card(
 		elevation = CardDefaults.cardElevation(4.dp),
 		modifier = Modifier
 			.fillMaxWidth()
-			.height(260.dp)
+			.height(260.dp) // Hauteur fixe pour uniformiser
+			.clickable { onClick() },
 	) {
 		Column(
 			modifier = Modifier.padding(8.dp),
@@ -83,11 +95,23 @@ fun ProductItem(product: Product) {
 				modifier = Modifier
 					.height(120.dp)
 					.fillMaxWidth(),
-				contentScale = ContentScale.Fit
+				contentScale = ContentScale.Fit,
+				// Ajoutez ceci pour debugger :
+				onState = { state ->
+					when (state) {
+						is coil3.compose.AsyncImagePainter.State.Error -> {
+							// Affiche l'erreur dans les logs
+							println("Coil Error: ${state.result.throwable}")
+						}
+
+						else -> {}
+					}
+				}
 			)
 
 			Spacer(modifier = Modifier.height(8.dp))
 
+			// Titre (tronqué si trop long)
 			Text(
 				text = product.title,
 				style = MaterialTheme.typography.bodyMedium,
@@ -96,6 +120,7 @@ fun ProductItem(product: Product) {
 				modifier = Modifier.weight(1f)
 			)
 
+			// Prix
 			Text(
 				text = "${product.price} €",
 				style = MaterialTheme.typography.titleMedium,
