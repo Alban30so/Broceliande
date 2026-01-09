@@ -78,14 +78,24 @@ fun ProductItem(product: Product) {
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			// Image
-			AsyncImage(
-				model = product.image,
-				contentDescription = product.title,
-				modifier = Modifier
-					.height(120.dp)
-					.fillMaxWidth(),
-				contentScale = ContentScale.Fit
-			)
+            AsyncImage(
+                model = product.image,
+                contentDescription = product.title,
+                modifier = Modifier
+                    .height(120.dp)
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Fit,
+                // Ajoutez ceci pour debugger :
+                onState = { state ->
+                    when (state) {
+                        is coil3.compose.AsyncImagePainter.State.Error -> {
+                            // Affiche l'erreur dans les logs
+                            println("Coil Error: ${state.result.throwable}")
+                        }
+                        else -> {}
+                    }
+                }
+            )
 
 			Spacer(modifier = Modifier.height(8.dp))
 
