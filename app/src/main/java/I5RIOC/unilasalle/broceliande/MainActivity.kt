@@ -34,157 +34,73 @@ class MainActivity : ComponentActivity() {
 
         val viewModel: MainViewModel by viewModels()
 
-        enableEdgeToEdge()
-        setContent {
-            BroceliandeTheme {
-                // États pour la recherche et le filtre
-                var searchQuery by remember { mutableStateOf("") }
-                var selectedCategory by remember { mutableStateOf<String?>(null) } // null = "Toutes les catégories"
-                var showMenu by remember { mutableStateOf(false) } // Pour ouvrir/fermer le menu
-
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .statusBarsPadding()
-                    ) {
-                        // --- 1. BARRE DE RECHERCHE ---
-                        SearchBar(
-                            query = searchQuery,
-                            onQueryChange = { searchQuery = it }
-                        )
-
-                        // --- 2. FILTRE CATÉGORIE (Bouton + Menu) ---
-                        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                            Button(
-                                onClick = { showMenu = true },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text(text = selectedCategory?.replaceFirstChar { it.uppercase() } ?: "Toutes les catégories")
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                            }
-
-                            // Menu déroulant
-                            DropdownMenu(
-                                expanded = showMenu,
-                                onDismissRequest = { showMenu = false }
-                            ) {
-                                // Option pour tout afficher
-                                DropdownMenuItem(
-                                    text = { Text("Toutes les catégories") },
-                                    onClick = {
-                                        selectedCategory = null
-                                        showMenu = false
-                                    }
-                                )
-                                // Liste des catégories depuis l'API
-                                viewModel.categories.value.forEach { category ->
-                                    DropdownMenuItem(
-                                        text = { Text(category.replaceFirstChar { it.uppercase() }) },
-                                        onClick = {
-                                            selectedCategory = category
-                                            showMenu = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        // --- 3. LOGIQUE DE FILTRAGE COMBINÉE ---
-                        val filteredProducts = viewModel.productList.value.filter { product ->
-                            // Vérifie si le titre contient la recherche
-                            val matchesSearch = product.title.contains(searchQuery, ignoreCase = true)
-                            // Vérifie si la catégorie correspond (ou si aucune n'est sélectionnée)
-                            val matchesCategory = selectedCategory == null || product.category == selectedCategory
-
-                            matchesSearch && matchesCategory
-                        }
-
-                        // --- 4. AFFICHAGE ---
-                        if (filteredProducts.isEmpty()) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Aucun produit trouvé", style = MaterialTheme.typography.bodyLarge)
-                            }
-                        } else {
-                            ProductListScreen(
-                                products = filteredProducts,
-                                onProductClick = { product ->
-                                    val intent = Intent(this@MainActivity, ProductDetailsActivity::class.java).apply {
-                                        putExtra("PRODUCT_EXTRA", product)
-                                    }
-                                    startActivity(intent)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-@Composable
-fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        placeholder = { Text("Rechercher...") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Effacer")
-                }
-            }
-        },
-        singleLine = true,
-        shape = MaterialTheme.shapes.medium
-    )
+		enableEdgeToEdge()
+		setContent {
+			BroceliandeTheme {
+				Surface(modifier = Modifier.fillMaxSize()) {
+					ProductListScreen(
+						products = viewModel.productList.value,
+						onProductClick = { product ->
+							val intent = Intent(this, ProductDetailsActivity::class.java).apply {
+								putExtra("PRODUCT_EXTRA", product)
+							}
+							startActivity(intent)
+						}
+					)
+				}
+			}
+		}
+	}
 }
 
 @Composable
 fun ProductListScreen(products: List<Product>, onProductClick: (Product) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
-        contentPadding = PaddingValues(bottom = 16.dp, start = 8.dp, end = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(products) { product ->
-            ProductItem(product = product, onClick = { onProductClick(product) })
-        }
-    }
+	// GridCells.Adaptive(150.dp) permet d'avoir 2 colonnes sur mobile, plus sur tablette (Responsive)
+	LazyVerticalGrid(
+		columns = GridCells.Adaptive(minSize = 160.dp),
+		contentPadding = PaddingValues(8.dp),
+		verticalArrangement = Arrangement.spacedBy(8.dp),
+		horizontalArrangement = Arrangement.spacedBy(8.dp)
+	) {
+		items(products) { product ->
+			ProductItem(product = product, onClick = { onProductClick(product) })
+		}
+	}
 }
 
 @Composable
 fun ProductItem(product: Product, onClick: () -> Unit) {
-    Card(
-        elevation = CardDefaults.cardElevation(4.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(260.dp)
-            .clickable { onClick() },
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(
-                model = product.image,
-                contentDescription = product.title,
-                modifier = Modifier
-                    .height(120.dp)
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Fit
-            )
+	Card(
+		elevation = CardDefaults.cardElevation(4.dp),
+		modifier = Modifier
+			.fillMaxWidth()
+			.height(260.dp) // Hauteur fixe pour uniformiser
+			.clickable { onClick() },
+	) {
+		Column(
+			modifier = Modifier.padding(8.dp),
+			horizontalAlignment = Alignment.CenterHorizontally
+		) {
+			// Image
+			AsyncImage(
+				model = product.image,
+				contentDescription = product.title,
+				modifier = Modifier
+					.height(120.dp)
+					.fillMaxWidth(),
+				contentScale = ContentScale.Fit,
+				// Ajoutez ceci pour debugger :
+				onState = { state ->
+					when (state) {
+						is coil3.compose.AsyncImagePainter.State.Error -> {
+							// Affiche l'erreur dans les logs
+							println("Coil Error: ${state.result.throwable}")
+						}
+
+						else -> {}
+					}
+				}
+			)
 
             Spacer(modifier = Modifier.height(8.dp))
 
