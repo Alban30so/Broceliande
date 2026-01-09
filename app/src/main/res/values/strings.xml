@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Broceliande</string>
+    <string name="title_activity_cart">CartActivity</string>
 </resources>

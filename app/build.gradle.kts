@@ -75,4 +75,5 @@ dependencies {
 	implementation(libs.retrofit.converter.gson)
 	implementation(libs.coil.compose)
     implementation(libs.coil.okhttp3)
+	implementation(libs.androidx.compose.material3.iconsextended)
 }

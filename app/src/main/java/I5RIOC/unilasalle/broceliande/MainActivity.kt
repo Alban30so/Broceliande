@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +22,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,16 +51,38 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		setContent {
 			BroceliandeTheme {
-				Surface(modifier = Modifier.fillMaxSize()) {
-					ProductListScreen(
-						products = viewModel.productList.value,
-						onProductClick = { product ->
-							val intent = Intent(this, ProductDetailsActivity::class.java).apply {
-								putExtra("PRODUCT_EXTRA", product)
-							}
-							startActivity(intent)
+				Scaffold(
+					floatingActionButton = {
+						FloatingActionButton(
+							onClick = {
+								startActivity(Intent(this, CartActivity::class.java))
+							},
+							containerColor = MaterialTheme.colorScheme.primary
+						) {
+							Icon(
+								imageVector = Icons.Default.ShoppingCart,
+								contentDescription = "Voir le panier"
+							)
 						}
-					)
+					}
+				) { innerPadding ->
+					Surface(modifier = Modifier
+						.fillMaxSize()
+						.padding(innerPadding)) {
+						ProductListScreen(
+							products = viewModel.productList.value,
+							onProductClick = { product ->
+								startActivity(
+									Intent(
+										this,
+										ProductDetailsActivity::class.java
+									).apply { putExtra("PRODUCT_EXTRA", product) })
+							},
+							onAddToCart = { product ->
+								viewModel.addToCart(product)
+							}
+						)
+					}
 				}
 			}
 		}
@@ -61,7 +90,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ProductListScreen(products: List<Product>, onProductClick: (Product) -> Unit) {
+fun ProductListScreen(
+	products: List<Product>,
+	onProductClick: (Product) -> Unit,
+	onAddToCart: (Product) -> Unit
+) {
 	// GridCells.Adaptive(150.dp) permet d'avoir 2 colonnes sur mobile, plus sur tablette (Responsive)
 	LazyVerticalGrid(
 		columns = GridCells.Adaptive(minSize = 160.dp),
@@ -70,48 +103,38 @@ fun ProductListScreen(products: List<Product>, onProductClick: (Product) -> Unit
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		items(products) { product ->
-			ProductItem(product = product, onClick = { onProductClick(product) })
+			ProductItem(
+				product = product,
+				onClick = { onProductClick(product) },
+				onAddToCart = { onAddToCart(product) })
 		}
 	}
 }
 
 @Composable
-fun ProductItem(product: Product, onClick: () -> Unit) {
+fun ProductItem(product: Product, onClick: () -> Unit, onAddToCart: () -> Unit) {
 	Card(
 		elevation = CardDefaults.cardElevation(4.dp),
 		modifier = Modifier
 			.fillMaxWidth()
-			.height(260.dp) // Hauteur fixe pour uniformiser
+			.height(300.dp)
 			.clickable { onClick() },
 	) {
 		Column(
 			modifier = Modifier.padding(8.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			// Image
 			AsyncImage(
 				model = product.image,
 				contentDescription = product.title,
 				modifier = Modifier
 					.height(120.dp)
 					.fillMaxWidth(),
-				contentScale = ContentScale.Fit,
-				// Ajoutez ceci pour debugger :
-				onState = { state ->
-					when (state) {
-						is coil3.compose.AsyncImagePainter.State.Error -> {
-							// Affiche l'erreur dans les logs
-							println("Coil Error: ${state.result.throwable}")
-						}
-
-						else -> {}
-					}
-				}
+				contentScale = ContentScale.Fit
 			)
 
 			Spacer(modifier = Modifier.height(8.dp))
 
-			// Titre (tronqué si trop long)
 			Text(
 				text = product.title,
 				style = MaterialTheme.typography.bodyMedium,
@@ -120,13 +143,25 @@ fun ProductItem(product: Product, onClick: () -> Unit) {
 				modifier = Modifier.weight(1f)
 			)
 
-			// Prix
-			Text(
-				text = "${product.price} €",
-				style = MaterialTheme.typography.titleMedium,
-				fontWeight = FontWeight.Bold,
-				color = MaterialTheme.colorScheme.primary
-			)
+			// Prix et Bouton
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
+			) {
+				Text(
+					text = "${product.price} €",
+					fontWeight = FontWeight.Bold,
+					color = MaterialTheme.colorScheme.primary
+				)
+
+				Button(
+					onClick = { onAddToCart() },
+					contentPadding = PaddingValues(horizontal = 8.dp)
+				) {
+					Text("(+)")
+				}
+			}
 		}
 	}
 }
