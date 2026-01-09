@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ProductListScreen(products: List<Product>) {
-	// GridCells.Adaptive(150.dp) permet d'avoir 2 colonnes sur mobile, plus sur tablette (Responsive)
 	LazyVerticalGrid(
 		columns = GridCells.Adaptive(minSize = 160.dp),
 		contentPadding = PaddingValues(8.dp),
@@ -71,35 +70,24 @@ fun ProductItem(product: Product) {
 		elevation = CardDefaults.cardElevation(4.dp),
 		modifier = Modifier
 			.fillMaxWidth()
-			.height(260.dp) // Hauteur fixe pour uniformiser
+			.height(260.dp)
 	) {
 		Column(
 			modifier = Modifier.padding(8.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			// Image
-            AsyncImage(
-                model = product.image,
-                contentDescription = product.title,
-                modifier = Modifier
-                    .height(120.dp)
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Fit,
-                // Ajoutez ceci pour debugger :
-                onState = { state ->
-                    when (state) {
-                        is coil3.compose.AsyncImagePainter.State.Error -> {
-                            // Affiche l'erreur dans les logs
-                            println("Coil Error: ${state.result.throwable}")
-                        }
-                        else -> {}
-                    }
-                }
-            )
+			AsyncImage(
+				model = product.image,
+				contentDescription = product.title,
+				modifier = Modifier
+					.height(120.dp)
+					.fillMaxWidth(),
+				contentScale = ContentScale.Fit
+			)
 
 			Spacer(modifier = Modifier.height(8.dp))
 
-			// Titre (tronqué si trop long)
 			Text(
 				text = product.title,
 				style = MaterialTheme.typography.bodyMedium,
@@ -108,7 +96,6 @@ fun ProductItem(product: Product) {
 				modifier = Modifier.weight(1f)
 			)
 
-			// Prix
 			Text(
 				text = "${product.price} €",
 				style = MaterialTheme.typography.titleMedium,
