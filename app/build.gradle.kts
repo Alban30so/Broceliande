@@ -75,4 +75,5 @@ dependencies {
 	implementation(libs.retrofit.converter.gson)
 	implementation(libs.coil.compose)
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+    implementation("androidx.compose.material:material-icons-core")
 }
