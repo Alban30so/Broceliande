@@ -8,6 +8,9 @@ import retrofit2.http.GET
 interface FakeStoreApi {
 	@GET("products")
 	suspend fun getAllProducts(): List<Product>
+
+	@GET("products/categories")
+	suspend fun getAllCategories(): List<String>
 }
 
 object RetrofitInstance {

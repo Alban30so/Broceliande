@@ -15,6 +15,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	var productList = mutableStateOf<List<Product>>(emptyList())
 		private set
 
+	// liste catégories
+	val categories = mutableStateOf<List<String>>(emptyList())
+
 	// DAO panier
 	private val dao = BroceliandeDatabase.getDatabase(application).cartDao()
 
@@ -24,6 +27,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		fetchProducts()
+		fetchCategories()
 		viewModelScope.launch {
 			dao.getCartItems().collect { items ->
 				_cartItems.value = items
@@ -36,6 +40,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 		viewModelScope.launch {
 			try {
 				productList.value = RetrofitInstance.api.getAllProducts()
+			} catch (e: Exception) {
+				e.printStackTrace()
+			}
+		}
+	}
+
+	// récupérer les catégories avec l'API
+	private fun fetchCategories() {
+		viewModelScope.launch {
+			try {
+				categories.value = RetrofitInstance.api.getAllCategories()
 			} catch (e: Exception) {
 				e.printStackTrace()
 			}

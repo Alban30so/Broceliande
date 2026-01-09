@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,17 +24,28 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -51,6 +63,10 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		setContent {
 			BroceliandeTheme {
+				var searchQuery by remember { mutableStateOf("") }
+				var selectedCategory by remember { mutableStateOf<String?>(null) }
+				var showMenu by remember { mutableStateOf(false) }
+
 				Scaffold(
 					floatingActionButton = {
 						FloatingActionButton(
@@ -66,22 +82,87 @@ class MainActivity : ComponentActivity() {
 						}
 					}
 				) { innerPadding ->
-					Surface(modifier = Modifier
-						.fillMaxSize()
-						.padding(innerPadding)) {
-						ProductListScreen(
-							products = viewModel.productList.value,
-							onProductClick = { product ->
-								startActivity(
-									Intent(
-										this,
-										ProductDetailsActivity::class.java
-									).apply { putExtra("PRODUCT_EXTRA", product) })
-							},
-							onAddToCart = { product ->
-								viewModel.addToCart(product)
-							}
+					Column(
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(innerPadding)
+					) {
+						SearchBar(
+							query = searchQuery,
+							onQueryChange = { searchQuery = it }
 						)
+
+						Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+							Button(
+								onClick = { showMenu = true },
+								colors = ButtonDefaults.buttonColors(
+									containerColor = MaterialTheme.colorScheme.secondaryContainer,
+									contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+								)
+							) {
+								Text(text = selectedCategory?.replaceFirstChar { it.uppercase() }
+									?: "Toutes les catégories")
+								Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+							}
+
+							DropdownMenu(
+								expanded = showMenu,
+								onDismissRequest = { showMenu = false }
+							) {
+								DropdownMenuItem(
+									text = { Text("Toutes les catégories") },
+									onClick = {
+										selectedCategory = null
+										showMenu = false
+									}
+								)
+								viewModel.categories.value.forEach { category ->
+									DropdownMenuItem(
+										text = { Text(category.replaceFirstChar { it.uppercase() }) },
+										onClick = {
+											selectedCategory = category
+											showMenu = false
+										}
+									)
+								}
+							}
+						}
+
+						val filteredProducts = viewModel.productList.value.filter { product ->
+							val matchesSearch =
+								product.title.contains(searchQuery, ignoreCase = true)
+							val matchesCategory =
+								selectedCategory == null || product.category == selectedCategory
+							matchesSearch && matchesCategory
+						}
+
+						if (filteredProducts.isEmpty()) {
+							Box(
+								modifier = Modifier.fillMaxSize(),
+								contentAlignment = Alignment.Center
+							) {
+								Text(
+									"Aucun produit trouvé",
+									style = MaterialTheme.typography.bodyLarge
+								)
+							}
+						} else {
+							ProductListScreen(
+								products = filteredProducts,
+								onProductClick = { product ->
+									val intent = Intent(
+										this@MainActivity,
+										ProductDetailsActivity::class.java
+									).apply {
+										putExtra("PRODUCT_EXTRA", product)
+									}
+									startActivity(intent)
+								},
+								onAddToCart = { product ->
+									viewModel.addToCart(product)
+								}
+							)
+						}
 					}
 				}
 			}
@@ -90,15 +171,41 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+	OutlinedTextField(
+		value = query,
+		onValueChange = onQueryChange,
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(horizontal = 16.dp, vertical = 8.dp),
+		placeholder = { Text("Rechercher...") },
+		leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+		trailingIcon = {
+			if (query.isNotEmpty()) {
+				IconButton(onClick = { onQueryChange("") }) {
+					Icon(Icons.Default.Clear, contentDescription = "Effacer")
+				}
+			}
+		},
+		singleLine = true,
+		shape = MaterialTheme.shapes.medium
+	)
+}
+
+@Composable
 fun ProductListScreen(
 	products: List<Product>,
 	onProductClick: (Product) -> Unit,
 	onAddToCart: (Product) -> Unit
 ) {
-	// GridCells.Adaptive(150.dp) permet d'avoir 2 colonnes sur mobile, plus sur tablette (Responsive)
 	LazyVerticalGrid(
 		columns = GridCells.Adaptive(minSize = 160.dp),
-		contentPadding = PaddingValues(8.dp),
+		contentPadding = PaddingValues(
+			bottom = 80.dp,
+			start = 8.dp,
+			end = 8.dp,
+			top = 8.dp
+		),
 		verticalArrangement = Arrangement.spacedBy(8.dp),
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
@@ -106,7 +213,8 @@ fun ProductListScreen(
 			ProductItem(
 				product = product,
 				onClick = { onProductClick(product) },
-				onAddToCart = { onAddToCart(product) })
+				onAddToCart = { onAddToCart(product) }
+			)
 		}
 	}
 }
@@ -143,7 +251,6 @@ fun ProductItem(product: Product, onClick: () -> Unit, onAddToCart: () -> Unit) 
 				modifier = Modifier.weight(1f)
 			)
 
-			// Prix et Bouton
 			Row(
 				modifier = Modifier.fillMaxWidth(),
 				verticalAlignment = Alignment.CenterVertically,
@@ -151,6 +258,7 @@ fun ProductItem(product: Product, onClick: () -> Unit, onAddToCart: () -> Unit) 
 			) {
 				Text(
 					text = "${product.price} €",
+					style = MaterialTheme.typography.titleMedium,
 					fontWeight = FontWeight.Bold,
 					color = MaterialTheme.colorScheme.primary
 				)
