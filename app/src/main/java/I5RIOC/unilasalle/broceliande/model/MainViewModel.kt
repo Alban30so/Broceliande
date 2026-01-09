@@ -10,8 +10,11 @@ class MainViewModel : ViewModel() {
 	var productList = mutableStateOf<List<Product>>(emptyList())
 		private set
 
+    val categories = mutableStateOf<List<String>>(emptyList())
+
 	init {
 		fetchProducts()
+        fetchCategories()
 	}
 
 	private fun fetchProducts() {
@@ -23,4 +26,17 @@ class MainViewModel : ViewModel() {
 			}
 		}
 	}
+
+    private fun fetchCategories() {
+        viewModelScope.launch {
+            try {
+                // Remplacez 'RetrofitInstance.api' par votre accès réel à l'API
+                val fetchedCategories = RetrofitInstance.api.getCategories()
+                categories.value = fetchedCategories
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 }

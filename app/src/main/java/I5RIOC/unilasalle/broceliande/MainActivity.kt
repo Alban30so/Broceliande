@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,8 +37,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BroceliandeTheme {
-                // État pour mémoriser la recherche utilisateur
+                // États pour la recherche et le filtre
                 var searchQuery by remember { mutableStateOf("") }
+                var selectedCategory by remember { mutableStateOf<String?>(null) } // null = "Toutes les catégories"
+                var showMenu by remember { mutableStateOf(false) } // Pour ouvrir/fermer le menu
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -45,36 +49,85 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .statusBarsPadding() // Évite de chevaucher la barre d'état
+                            .statusBarsPadding()
                     ) {
-                        // 1. Barre de recherche
+                        // --- 1. BARRE DE RECHERCHE ---
                         SearchBar(
                             query = searchQuery,
                             onQueryChange = { searchQuery = it }
                         )
 
-                        // 2. Filtrage de la liste en fonction du titre
-                        val filteredProducts = viewModel.productList.value.filter {
-                            it.title.contains(searchQuery, ignoreCase = true)
+                        // --- 2. FILTRE CATÉGORIE (Bouton + Menu) ---
+                        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            Button(
+                                onClick = { showMenu = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            ) {
+                                Text(text = selectedCategory?.replaceFirstChar { it.uppercase() } ?: "Toutes les catégories")
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+
+                            // Menu déroulant
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                // Option pour tout afficher
+                                DropdownMenuItem(
+                                    text = { Text("Toutes les catégories") },
+                                    onClick = {
+                                        selectedCategory = null
+                                        showMenu = false
+                                    }
+                                )
+                                // Liste des catégories depuis l'API
+                                viewModel.categories.value.forEach { category ->
+                                    DropdownMenuItem(
+                                        text = { Text(category.replaceFirstChar { it.uppercase() }) },
+                                        onClick = {
+                                            selectedCategory = category
+                                            showMenu = false
+                                        }
+                                    )
+                                }
+                            }
                         }
 
-                        // 3. Affichage de la liste filtrée
-                        ProductListScreen(
-                            products = filteredProducts,
-                            onProductClick = { product ->
-                                val intent = Intent(this@MainActivity, ProductDetailsActivity::class.java).apply {
-                                    putExtra("PRODUCT_EXTRA", product)
-                                }
-                                startActivity(intent)
+                        // --- 3. LOGIQUE DE FILTRAGE COMBINÉE ---
+                        val filteredProducts = viewModel.productList.value.filter { product ->
+                            // Vérifie si le titre contient la recherche
+                            val matchesSearch = product.title.contains(searchQuery, ignoreCase = true)
+                            // Vérifie si la catégorie correspond (ou si aucune n'est sélectionnée)
+                            val matchesCategory = selectedCategory == null || product.category == selectedCategory
+
+                            matchesSearch && matchesCategory
+                        }
+
+                        // --- 4. AFFICHAGE ---
+                        if (filteredProducts.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Aucun produit trouvé", style = MaterialTheme.typography.bodyLarge)
                             }
-                        )
+                        } else {
+                            ProductListScreen(
+                                products = filteredProducts,
+                                onProductClick = { product ->
+                                    val intent = Intent(this@MainActivity, ProductDetailsActivity::class.java).apply {
+                                        putExtra("PRODUCT_EXTRA", product)
+                                    }
+                                    startActivity(intent)
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     OutlinedTextField(
@@ -82,17 +135,18 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        placeholder = { Text("Rechercher un produit...") },
-        leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Icône de recherche")
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        placeholder = { Text("Rechercher...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(Icons.Default.Clear, contentDescription = "Effacer")
+                }
+            }
         },
         singleLine = true,
-        shape = MaterialTheme.shapes.medium,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline
-        )
+        shape = MaterialTheme.shapes.medium
     )
 }
 
