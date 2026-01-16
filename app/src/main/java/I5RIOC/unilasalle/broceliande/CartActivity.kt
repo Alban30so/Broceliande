@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,10 +61,16 @@ class CartActivity : ComponentActivity() {
 					modifier = Modifier.fillMaxSize(),
 					color = MaterialTheme.colorScheme.background
 				) {
-					CartScreen(
-						items = cartItems,
-						onDelete = { product -> viewModel.removeFromCart(product) }
-					)
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.safeDrawingPadding()
+					) {
+						CartScreen(
+							items = cartItems,
+							onDelete = { product -> viewModel.removeFromCart(product) }
+						)
+					}
 				}
 			}
 		}
