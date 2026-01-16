@@ -43,6 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
 
 class CartActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,7 +133,7 @@ fun CartItemRow(item: CartItem, onDelete: () -> Unit) {
 @Composable
 fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 	val total = items.sumOf { it.price * it.quantity }
-
+	val context = LocalContext.current
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
@@ -170,7 +172,10 @@ fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 					}
 					Spacer(modifier = Modifier.height(8.dp))
 					Button(
-						onClick = {/* ici on fait rien pour l'instnat */ },
+						onClick = {
+							val intent = Intent(context, CommandActivity::class.java)
+							context.startActivity(intent)
+						},
 						modifier = Modifier.fillMaxWidth()
 					) {
 						Text("Valider la commande")

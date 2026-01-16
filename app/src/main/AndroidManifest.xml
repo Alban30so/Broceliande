@@ -13,13 +13,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Broceliande">
         <activity
+            android:name=".CommandActivity"
+            android:exported="false" />
+        <activity
             android:name=".CartActivity"
             android:exported="false"
             android:label="@string/title_activity_cart"
             android:theme="@style/Theme.Broceliande" />
         <activity
             android:name=".ProductDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Broceliande" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
