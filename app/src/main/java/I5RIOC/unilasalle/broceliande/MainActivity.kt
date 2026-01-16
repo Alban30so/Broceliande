@@ -3,6 +3,7 @@ package I5RIOC.unilasalle.broceliande
 import I5RIOC.unilasalle.broceliande.model.MainViewModel
 import I5RIOC.unilasalle.broceliande.model.Product
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
+import I5RIOC.unilasalle.broceliande.utils.ToastHelper
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -50,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +70,7 @@ class MainActivity : ComponentActivity() {
 				var searchQuery by remember { mutableStateOf("") }
 				var selectedCategory by remember { mutableStateOf<String?>(null) }
 				var showMenu by remember { mutableStateOf(false) }
+				val context = LocalContext.current
 
 				Scaffold(
 					floatingActionButton = {
@@ -176,6 +179,7 @@ class MainActivity : ComponentActivity() {
 								},
 								onAddToCart = { product ->
 									viewModel.addToCart(product)
+									ToastHelper.showShortToast(context, "Ajouté au panier ✨")
 								}
 							)
 						}

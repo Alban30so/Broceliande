@@ -137,12 +137,6 @@ fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 			.fillMaxSize()
 			.padding(16.dp)
 	) {
-		Text(
-			"Mon panier",
-			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.padding(bottom = 16.dp)
-		)
-
 		if (items.isEmpty()) {
 			Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 				Text("Votre panier est vide \uD83D\uDED2")
@@ -169,7 +163,7 @@ fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 					) {
 						Text("Total à payer :", style = MaterialTheme.typography.titleMedium)
 						Text(
-							"$total €",
+							text = "%.2f €".format(total),
 							style = MaterialTheme.typography.titleLarge,
 							fontWeight = FontWeight.Bold
 						)
