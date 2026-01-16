@@ -53,9 +53,11 @@ class ProductDetailsActivity : ComponentActivity() {
 		setContent {
 			BroceliandeTheme {
 				Surface(color = MaterialTheme.colorScheme.background) {
-					Box(modifier = Modifier
-						.fillMaxSize()
-						.safeDrawingPadding()) {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.safeDrawingPadding()
+					) {
 						product?.let { ProductDetailScreen(it) }
 
 						product?.let {

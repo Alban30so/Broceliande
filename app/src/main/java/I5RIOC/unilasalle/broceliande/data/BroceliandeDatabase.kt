@@ -1,14 +1,21 @@
 package I5RIOC.unilasalle.broceliande.data
 
 import I5RIOC.unilasalle.broceliande.model.CartItem
+import I5RIOC.unilasalle.broceliande.model.Order
+import I5RIOC.unilasalle.broceliande.model.OrderItem
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [CartItem::class], version = 1, exportSchema = false)
+@Database(
+	entities = [CartItem::class, Order::class, OrderItem::class],
+	version = 2,
+	exportSchema = false
+)
 abstract class BroceliandeDatabase : RoomDatabase() {
 	abstract fun cartDao(): CartDao
+	abstract fun orderDao(): OrderDao
 
 	companion object {
 		@Volatile
@@ -20,7 +27,9 @@ abstract class BroceliandeDatabase : RoomDatabase() {
 					context.applicationContext,
 					BroceliandeDatabase::class.java,
 					"broceliande_database"
-				).build()
+				)
+					.fallbackToDestructiveMigration(false)
+					.build()
 				INSTANCE = instance
 				instance
 			}

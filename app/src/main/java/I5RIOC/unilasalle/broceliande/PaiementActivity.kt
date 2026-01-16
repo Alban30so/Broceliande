@@ -1,42 +1,67 @@
 package I5RIOC.unilasalle.broceliande
 
 import I5RIOC.unilasalle.broceliande.model.MainViewModel
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
-import androidx.activity.viewModels
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PaiementActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,11 +102,11 @@ class PaiementActivity : ComponentActivity() {
 					}
 					PaymentScreen(
 						onPaymentSuccess = {
-							//Clearing du panier.
-							viewModel.clearCart()
+							viewModel.validateOrder()
 							// Retour à l'accueil en vidant la pile d'activités
 							val intent = Intent(this, MainActivity::class.java)
-							intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+							intent.flags =
+								Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
 							startActivity(intent)
 							//Envoi notification
 							sendNotification(context)
@@ -95,17 +120,15 @@ class PaiementActivity : ComponentActivity() {
 }
 
 private fun createNotificationChannel(context: Context) {
-	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-		val name = "Commandes Brocéliande"
-		val descriptionText = "Notifications de suivi de commande"
-		val importance = NotificationManager.IMPORTANCE_DEFAULT
-		val channel = NotificationChannel("ORDER_CHANNEL_ID", name, importance).apply {
-			description = descriptionText
-		}
-		val notificationManager: NotificationManager =
-			context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-		notificationManager.createNotificationChannel(channel)
+	val name = "Commandes Brocéliande"
+	val descriptionText = "Notifications de suivi de commande"
+	val importance = NotificationManager.IMPORTANCE_DEFAULT
+	val channel = NotificationChannel("ORDER_CHANNEL_ID", name, importance).apply {
+		description = descriptionText
 	}
+	val notificationManager: NotificationManager =
+		context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+	notificationManager.createNotificationChannel(channel)
 }
 
 private fun sendNotification(context: Context) {
@@ -153,9 +176,18 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 
 			// Icône de sécurité
 			Row(verticalAlignment = Alignment.CenterVertically) {
-				Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+				Icon(
+					Icons.Default.Lock,
+					contentDescription = null,
+					tint = Color.Gray,
+					modifier = Modifier.size(16.dp)
+				)
 				Spacer(modifier = Modifier.width(4.dp))
-				Text("Vos données sont chiffrées (Simulation)", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+				Text(
+					"Vos données sont chiffrées (Simulation)",
+					style = MaterialTheme.typography.bodySmall,
+					color = Color.Gray
+				)
 			}
 
 			Spacer(modifier = Modifier.height(16.dp))
@@ -163,7 +195,9 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 			// 1. Numéro de carte
 			OutlinedTextField(
 				value = cardNumber,
-				onValueChange = { if (it.length <= 16 && it.all { char -> char.isDigit() }) cardNumber = it },
+				onValueChange = {
+					if (it.length <= 16 && it.all { char -> char.isDigit() }) cardNumber = it
+				},
 				label = { Text("Numéro de carte") },
 				modifier = Modifier.fillMaxWidth(),
 				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -183,11 +217,16 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 			)
 
 			// Ligne Date + CVV
-			Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+			Row(
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.spacedBy(16.dp)
+			) {
 				// 3. Date d'expiration
 				OutlinedTextField(
 					value = expiryDate,
-					onValueChange = { if (it.length <= 4 && it.all { char -> char.isDigit() }) expiryDate = it },
+					onValueChange = {
+						if (it.length <= 4 && it.all { char -> char.isDigit() }) expiryDate = it
+					},
 					label = { Text("MM/AA") },
 					modifier = Modifier.weight(1f),
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -199,7 +238,9 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 				// 4. CVV
 				OutlinedTextField(
 					value = cvv,
-					onValueChange = { if (it.length <= 3 && it.all { char -> char.isDigit() }) cvv = it },
+					onValueChange = {
+						if (it.length <= 3 && it.all { char -> char.isDigit() }) cvv = it
+					},
 					label = { Text("CVV") },
 					modifier = Modifier.weight(1f),
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -222,10 +263,15 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 					}
 				},
 				enabled = !isLoading && cardNumber.length == 16 && expiryDate.length == 4 && cvv.length == 3,
-				modifier = Modifier.fillMaxWidth().height(50.dp)
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(50.dp)
 			) {
 				if (isLoading) {
-					CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+					CircularProgressIndicator(
+						modifier = Modifier.size(24.dp),
+						color = MaterialTheme.colorScheme.onPrimary
+					)
 				} else {
 					Text("Payer maintenant")
 				}
@@ -237,7 +283,9 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 @Composable
 fun SuccessView(onHomeClick: () -> Unit) {
 	Column(
-		modifier = Modifier.fillMaxSize().padding(32.dp),
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(32.dp),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Center
 	) {

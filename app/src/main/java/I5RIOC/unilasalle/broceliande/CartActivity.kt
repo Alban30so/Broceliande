@@ -5,6 +5,7 @@ import I5RIOC.unilasalle.broceliande.model.MainViewModel
 import I5RIOC.unilasalle.broceliande.model.Product
 import I5RIOC.unilasalle.broceliande.model.Rating
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,12 +41,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import androidx.compose.ui.platform.LocalContext
-import android.content.Intent
 
 class CartActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {

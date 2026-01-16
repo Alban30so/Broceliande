@@ -19,7 +19,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	val categories = mutableStateOf<List<String>>(emptyList())
 
 	// DAO panier
-	private val dao = BroceliandeDatabase.getDatabase(application).cartDao()
+	private val cartDao = BroceliandeDatabase.getDatabase(application).cartDao()
+
+	// DAO historique commande
+	private val orderDao = BroceliandeDatabase.getDatabase(application).orderDao()
+
+	// historique de commandes
+	val orders = orderDao.getAllOrders()
 
 	// refresh UI automatique
 	private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
@@ -29,7 +35,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 		fetchProducts()
 		fetchCategories()
 		viewModelScope.launch {
-			dao.getCartItems().collect { items ->
+			cartDao.getCartItems().collect { items ->
 				_cartItems.value = items
 			}
 		}
@@ -60,10 +66,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	// ajout d'un produit au panier
 	fun addToCart(product: Product) {
 		viewModelScope.launch {
-			val existingItem = dao.getCartItemById(product.id)
+			val existingItem = cartDao.getCartItemById(product.id)
 			if (existingItem != null) {
 				val updatedItem = existingItem.copy(quantity = existingItem.quantity + 1)
-				dao.insertOrUpdate(updatedItem)
+				cartDao.insertOrUpdate(updatedItem)
 			} else {
 				val newItem = CartItem(
 					id = product.id,
@@ -72,7 +78,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 					image = product.image,
 					quantity = 1
 				)
-				dao.insertOrUpdate(newItem)
+				cartDao.insertOrUpdate(newItem)
 			}
 		}
 	}
@@ -80,13 +86,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	// suppression d'un produit au panier
 	fun removeFromCart(product: Product) {
 		viewModelScope.launch {
-			val existingItem = dao.getCartItemById(product.id)
+			val existingItem = cartDao.getCartItemById(product.id)
 			if (existingItem != null) {
 				if (existingItem.quantity > 1) {
 					val updatedItem = existingItem.copy(quantity = existingItem.quantity - 1)
-					dao.insertOrUpdate(updatedItem)
+					cartDao.insertOrUpdate(updatedItem)
 				} else {
-					dao.deleteItem(product.id)
+					cartDao.deleteItem(product.id)
 				}
 			}
 		}
@@ -95,8 +101,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	//Clearing du panier.
 	fun clearCart() {
 		viewModelScope.launch {
-			dao.clearCart()
+			cartDao.clearCart()
 		}
 	}
 
+	fun validateOrder() {
+		viewModelScope.launch {
+			val currentCart = _cartItems.value
+			if (currentCart.isNotEmpty()) {
+				val total = currentCart.sumOf { it.price * it.quantity }
+				val timestamp = System.currentTimeMillis()
+
+				val order = Order(date = timestamp, totalAmount = total)
+				val orderId = orderDao.insertOrder(order)
+
+				val orderItems = currentCart.map { item ->
+					OrderItem(
+						orderId = orderId,
+						productTitle = item.title,
+						productPrice = item.price,
+						quantity = item.quantity,
+						image = item.image
+					)
+				}
+				orderDao.insertOrderItems(orderItems)
+
+				cartDao.clearCart()
+			}
+		}
+	}
 }

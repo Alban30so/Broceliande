@@ -26,9 +26,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
@@ -80,29 +81,60 @@ class MainActivity : ComponentActivity() {
 
 				Scaffold(
 					floatingActionButton = {
-						FloatingActionButton(
-							onClick = {
-								startActivity(Intent(this, CartActivity::class.java))
-							},
-							containerColor = MaterialTheme.colorScheme.primary
+						Box(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(horizontal = 32.dp)
 						) {
-							BadgedBox(
-								badge = {
-									if (totalItems > 0) {
-										Badge(
-											containerColor = MaterialTheme.colorScheme.error,
-											contentColor = MaterialTheme.colorScheme.onError
-										) {
-											Text("$totalItems")
-										}
-									}
-								}
+							FloatingActionButton(
+								onClick = {
+									startActivity(
+										Intent(
+											this@MainActivity,
+											OrderHistoryActivity::class.java
+										)
+									)
+								},
+								containerColor = MaterialTheme.colorScheme.secondaryContainer,
+								modifier = Modifier.align(Alignment.BottomStart)
 							) {
 								Icon(
-									imageVector = Icons.Default.ShoppingCart,
-									contentDescription = "Voir le panier",
-									tint = MaterialTheme.colorScheme.onPrimary
+									imageVector = Icons.Default.History,
+									contentDescription = "Voir l'historique des commandes",
+									tint = MaterialTheme.colorScheme.onSecondaryContainer
 								)
+							}
+
+							FloatingActionButton(
+								onClick = {
+									startActivity(
+										Intent(
+											this@MainActivity,
+											CartActivity::class.java
+										)
+									)
+								},
+								containerColor = MaterialTheme.colorScheme.primary,
+								modifier = Modifier.align(Alignment.BottomEnd)
+							) {
+								BadgedBox(
+									badge = {
+										if (totalItems > 0) {
+											Badge(
+												containerColor = MaterialTheme.colorScheme.error,
+												contentColor = MaterialTheme.colorScheme.onError
+											) {
+												Text("$totalItems")
+											}
+										}
+									}
+								) {
+									Icon(
+										imageVector = Icons.Default.ShoppingCart,
+										contentDescription = "Voir le panier",
+										tint = MaterialTheme.colorScheme.onPrimary
+									)
+								}
 							}
 						}
 					}
@@ -309,7 +341,7 @@ fun ProductItem(product: Product, onClick: () -> Unit, onAddToCart: () -> Unit) 
 					contentPadding = PaddingValues(horizontal = 8.dp)
 				) {
 					Icon(
-						imageVector = Icons.Default.Add,
+						imageVector = Icons.Default.AddShoppingCart,
 						contentDescription = "Ajouter au panier"
 					)
 				}
