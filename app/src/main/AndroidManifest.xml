@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -13,13 +14,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Broceliande">
         <activity
+            android:name=".PaiementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CommandActivity"
+            android:exported="false" />
+        <activity
             android:name=".CartActivity"
             android:exported="false"
             android:label="@string/title_activity_cart"
             android:theme="@style/Theme.Broceliande" />
         <activity
             android:name=".ProductDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Broceliande" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
