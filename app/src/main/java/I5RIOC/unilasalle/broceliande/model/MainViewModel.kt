@@ -91,4 +91,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 			}
 		}
 	}
+
+	//Clearing du panier.
+	fun clearCart() {
+		viewModelScope.launch {
+			dao.clearCart()
+		}
+	}
+
 }

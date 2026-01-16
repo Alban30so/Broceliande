@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 class CommandActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +24,7 @@ class CommandActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		setContent {
 			BroceliandeTheme {
+				val context = LocalContext.current
 				Surface(
 					modifier = Modifier.fillMaxSize(),
 					color = MaterialTheme.colorScheme.background
@@ -29,8 +32,8 @@ class CommandActivity : ComponentActivity() {
 					CommandFormScreen(
 						onBack = { finish() }, // Termine l'activité pour revenir au panier
 						onPayment = {
-							// TODO: Logique de paiement future
-							Toast.makeText(this, "Vers le paiement...", Toast.LENGTH_SHORT).show()
+							val intent = Intent(context, PaiementActivity::class.java)
+							context.startActivity(intent)
 						}
 					)
 				}
