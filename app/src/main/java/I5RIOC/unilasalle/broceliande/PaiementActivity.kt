@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -102,15 +103,19 @@ class PaiementActivity : ComponentActivity() {
 					}
 					PaymentScreen(
 						onPaymentSuccess = {
-							viewModel.validateOrder()
-							// Retour à l'accueil en vidant la pile d'activités
-							val intent = Intent(this, MainActivity::class.java)
-							intent.flags =
-								Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-							startActivity(intent)
-							//Envoi notification
-							sendNotification(context)
-							finish()
+							lifecycleScope.launch {
+								viewModel.validateOrder()
+
+								// Retour à l'accueil en vidant la pile d'activités
+								val intent = Intent(this@PaiementActivity, MainActivity::class.java)
+								intent.flags =
+									Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+								startActivity(intent)
+
+								//Envoi notification
+								sendNotification(context)
+								finish()
+							}
 						}
 					)
 				}

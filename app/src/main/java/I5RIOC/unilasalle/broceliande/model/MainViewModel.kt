@@ -98,36 +98,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 		}
 	}
 
-	//Clearing du panier.
-	fun clearCart() {
-		viewModelScope.launch {
-			cartDao.clearCart()
-		}
-	}
+	suspend fun validateOrder() {
+		val currentCart = cartDao.getCartItemsSync()
 
-	fun validateOrder() {
-		viewModelScope.launch {
-			val currentCart = _cartItems.value
-			if (currentCart.isNotEmpty()) {
-				val total = currentCart.sumOf { it.price * it.quantity }
-				val timestamp = System.currentTimeMillis()
+		if (currentCart.isNotEmpty()) {
+			val total = currentCart.sumOf { it.price * it.quantity }
+			val timestamp = System.currentTimeMillis()
 
-				val order = Order(date = timestamp, totalAmount = total)
-				val orderId = orderDao.insertOrder(order)
+			val order = Order(date = timestamp, totalAmount = total)
+			val orderId = orderDao.insertOrder(order)
 
-				val orderItems = currentCart.map { item ->
-					OrderItem(
-						orderId = orderId,
-						productTitle = item.title,
-						productPrice = item.price,
-						quantity = item.quantity,
-						image = item.image
-					)
-				}
-				orderDao.insertOrderItems(orderItems)
-
-				cartDao.clearCart()
+			val orderItems = currentCart.map { item ->
+				OrderItem(
+					orderId = orderId,
+					productTitle = item.title,
+					productPrice = item.price,
+					quantity = item.quantity,
+					image = item.image
+				)
 			}
+			orderDao.insertOrderItems(orderItems)
+
+			cartDao.clearCart()
 		}
 	}
 }

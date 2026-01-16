@@ -12,6 +12,9 @@ interface CartDao {
 	@Query("SELECT * FROM cart")
 	fun getCartItems(): Flow<List<CartItem>>
 
+	@Query("SELECT * FROM cart")
+	fun getCartItemsSync(): List<CartItem>
+
 	@Query("SELECT * FROM cart WHERE id = :productId LIMIT 1")
 	suspend fun getCartItemById(productId: Int): CartItem?
 
