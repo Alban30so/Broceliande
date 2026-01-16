@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,7 +51,7 @@ class OrderHistoryActivity : ComponentActivity() {
 			BroceliandeTheme {
 				Surface {
 					val orders by viewModel.orders.collectAsState(initial = emptyList())
-					OrderHistoryScreen(orders = orders, onBack = { finish() })
+					OrderHistoryScreen(orders = orders)
 				}
 			}
 		}
@@ -58,10 +59,13 @@ class OrderHistoryActivity : ComponentActivity() {
 }
 
 @Composable
-fun OrderHistoryScreen(orders: List<OrderWithItems>, onBack: () -> Unit) {
-	Column(modifier = Modifier
-		.fillMaxSize()
-		.padding(16.dp)) {
+fun OrderHistoryScreen(orders: List<OrderWithItems>) {
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.safeDrawingPadding()
+			.padding(16.dp)
+	) {
 		Text(
 			text = "Mes commandes",
 			style = MaterialTheme.typography.headlineMedium,

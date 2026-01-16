@@ -40,6 +40,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,6 +81,8 @@ class MainActivity : ComponentActivity() {
 				val totalItems = cartItems.sumOf { it.quantity }
 
 				Scaffold(
+					floatingActionButtonPosition = FabPosition.Center,
+
 					floatingActionButton = {
 						Box(
 							modifier = Modifier
