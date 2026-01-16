@@ -179,7 +179,6 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 				color = MaterialTheme.colorScheme.primary
 			)
 
-			// Icône de sécurité
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				Icon(
 					Icons.Default.Lock,
@@ -197,7 +196,6 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			// 1. Numéro de carte
 			OutlinedTextField(
 				value = cardNumber,
 				onValueChange = {
@@ -211,7 +209,6 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 				placeholder = { Text("0000 0000 0000 0000") }
 			)
 
-			// 2. Nom du titulaire
 			OutlinedTextField(
 				value = cardHolder,
 				onValueChange = { cardHolder = it },
@@ -221,26 +218,35 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 				singleLine = true
 			)
 
-			// Ligne Date + CVV
 			Row(
 				modifier = Modifier.fillMaxWidth(),
 				horizontalArrangement = Arrangement.spacedBy(16.dp)
 			) {
-				// 3. Date d'expiration
 				OutlinedTextField(
 					value = expiryDate,
-					onValueChange = {
-						if (it.length <= 4 && it.all { char -> char.isDigit() }) expiryDate = it
+					onValueChange = { input ->
+						if (input.length <= 4 && input.all { it.isDigit() }) {
+
+							val isValidMonth = if (input.length >= 2) {
+								val month = input.take(2).toIntOrNull() ?: 0
+								month in 1..12
+							} else {
+								true
+							}
+
+							if (isValidMonth) {
+								expiryDate = input
+							}
+						}
 					},
 					label = { Text("MM/AA") },
 					modifier = Modifier.weight(1f),
 					keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-					visualTransformation = ExpiryDateVisualTransformation(), // Ajoute le /
+					visualTransformation = ExpiryDateVisualTransformation(),
 					singleLine = true,
 					placeholder = { Text("MM/AA") }
 				)
 
-				// 4. CVV
 				OutlinedTextField(
 					value = cvv,
 					onValueChange = {
@@ -256,15 +262,12 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 
 			Spacer(modifier = Modifier.weight(1f))
 
-			// Bouton Payer
 			Button(
 				onClick = {
 					isLoading = true
-					// Simulation du paiement
 					scope.launch {
-						delay(2500) // Attendre 2.5 secondes
+						delay(2500)
 						isLoading = false
-						isSuccess = true
 					}
 				},
 				enabled = !isLoading && cardNumber.length == 16 && expiryDate.length == 4 && cvv.length == 3,
@@ -317,9 +320,6 @@ fun SuccessView(onHomeClick: () -> Unit) {
 	}
 }
 
-// --- CLASSES UTILITAIRES POUR LE FORMATAGE VISUEL ---
-
-// Transforme "12345678" en "1234 5678" visuellement
 class CreditCardVisualTransformation : VisualTransformation {
 	override fun filter(text: AnnotatedString): TransformedText {
 		val trimmed = if (text.text.length >= 16) text.text.substring(0..15) else text.text
@@ -350,7 +350,6 @@ class CreditCardVisualTransformation : VisualTransformation {
 	}
 }
 
-// Transforme "1225" en "12/25" visuellement
 class ExpiryDateVisualTransformation : VisualTransformation {
 	override fun filter(text: AnnotatedString): TransformedText {
 		val trimmed = if (text.text.length >= 4) text.text.substring(0..3) else text.text

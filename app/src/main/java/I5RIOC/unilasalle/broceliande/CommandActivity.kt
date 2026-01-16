@@ -45,7 +45,7 @@ class CommandActivity : ComponentActivity() {
 					color = MaterialTheme.colorScheme.background
 				) {
 					CommandFormScreen(
-						onBack = { finish() }, // Termine l'activité pour revenir au panier
+						onBack = { finish() },
 						onPayment = {
 							val intent = Intent(context, PaiementActivity::class.java)
 							context.startActivity(intent)
@@ -79,18 +79,25 @@ fun CommandFormScreen(onBack: () -> Unit, onPayment: () -> Unit) {
 			color = MaterialTheme.colorScheme.primary
 		)
 
-		// --- Champs du formulaire ---
 		OutlinedTextField(
 			value = nom,
-			onValueChange = { nom = it },
+			onValueChange = {
+				if (it.length <= 50) {
+					nom = it
+				}
+			},
 			label = { Text("Nom") },
 			modifier = Modifier.fillMaxWidth(),
-			singleLine = true
+			singleLine = true,
 		)
 
 		OutlinedTextField(
 			value = prenom,
-			onValueChange = { prenom = it },
+			onValueChange = {
+				if (it.length <= 50) {
+					prenom = it
+				}
+			},
 			label = { Text("Prénom") },
 			modifier = Modifier.fillMaxWidth(),
 			singleLine = true
@@ -98,7 +105,11 @@ fun CommandFormScreen(onBack: () -> Unit, onPayment: () -> Unit) {
 
 		OutlinedTextField(
 			value = email,
-			onValueChange = { email = it },
+			onValueChange = {
+				if (it.length <= 320) {
+					email = it
+				}
+			},
 			label = { Text("Email") },
 			modifier = Modifier.fillMaxWidth(),
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
