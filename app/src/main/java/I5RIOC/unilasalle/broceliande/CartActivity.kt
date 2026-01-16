@@ -31,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -53,10 +54,15 @@ class CartActivity : ComponentActivity() {
 		setContent {
 			BroceliandeTheme {
 				val cartItems by viewModel.cartItems.collectAsState()
-				CartScreen(
-					items = cartItems,
-					onDelete = { product -> viewModel.removeFromCart(product) }
-				)
+				Surface(
+					modifier = Modifier.fillMaxSize(),
+					color = MaterialTheme.colorScheme.background
+				) {
+					CartScreen(
+						items = cartItems,
+						onDelete = { product -> viewModel.removeFromCart(product) }
+					)
+				}
 			}
 		}
 	}
@@ -132,7 +138,7 @@ fun CartScreen(items: List<CartItem>, onDelete: (Product) -> Unit) {
 			.padding(16.dp)
 	) {
 		Text(
-			"Mon Panier",
+			"Mon panier",
 			style = MaterialTheme.typography.headlineMedium,
 			modifier = Modifier.padding(bottom = 16.dp)
 		)

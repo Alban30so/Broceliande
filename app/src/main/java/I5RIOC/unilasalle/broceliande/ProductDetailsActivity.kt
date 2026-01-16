@@ -1,6 +1,7 @@
 package I5RIOC.unilasalle.broceliande
 
 import I5RIOC.unilasalle.broceliande.model.Product
+import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -39,7 +40,7 @@ class ProductDetailsActivity : ComponentActivity() {
 		}
 
 		setContent {
-			MaterialTheme {
+			BroceliandeTheme {
 				Surface(color = MaterialTheme.colorScheme.background) {
 					product?.let { ProductDetailScreen(it) }
 				}
