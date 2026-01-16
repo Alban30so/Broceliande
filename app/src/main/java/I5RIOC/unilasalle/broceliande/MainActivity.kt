@@ -26,10 +26,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,6 +47,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +75,8 @@ class MainActivity : ComponentActivity() {
 				var selectedCategory by remember { mutableStateOf<String?>(null) }
 				var showMenu by remember { mutableStateOf(false) }
 				val context = LocalContext.current
+				val cartItems by viewModel.cartItems.collectAsState()
+				val totalItems = cartItems.sumOf { it.quantity }
 
 				Scaffold(
 					floatingActionButton = {
@@ -80,10 +86,24 @@ class MainActivity : ComponentActivity() {
 							},
 							containerColor = MaterialTheme.colorScheme.primary
 						) {
-							Icon(
-								imageVector = Icons.Default.ShoppingCart,
-								contentDescription = "Voir le panier"
-							)
+							BadgedBox(
+								badge = {
+									if (totalItems > 0) {
+										Badge(
+											containerColor = MaterialTheme.colorScheme.error,
+											contentColor = MaterialTheme.colorScheme.onError
+										) {
+											Text("$totalItems")
+										}
+									}
+								}
+							) {
+								Icon(
+									imageVector = Icons.Default.ShoppingCart,
+									contentDescription = "Voir le panier",
+									tint = MaterialTheme.colorScheme.onPrimary
+								)
+							}
 						}
 					}
 				) { innerPadding ->
@@ -287,7 +307,10 @@ fun ProductItem(product: Product, onClick: () -> Unit, onAddToCart: () -> Unit) 
 					onClick = { onAddToCart() },
 					contentPadding = PaddingValues(horizontal = 8.dp)
 				) {
-					Text("(+)")
+					Icon(
+						imageVector = Icons.Default.Add,
+						contentDescription = "Ajouter au panier"
+					)
 				}
 			}
 		}
