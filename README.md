@@ -18,9 +18,9 @@ L'application couvre l'ensemble du parcours utilisateur d'un site de e-commerce 
 depuis l'API.
 - **Indicateur de panier :** Badge sur le bouton du panier indiquant le nombre d'articles.
 
-![La page d'accueil](img/1-accueil.png)
+![La page d'accueil](img/1-accueil.webp)
 
-![Le filtrage par catégorie et recherche](img/9-filtrage.png)
+![Le filtrage par catégorie et recherche](img/9-filtrage.webp)
 
 ### Détails du produit *(la page affichée au clique d'un produit)*
 
@@ -29,14 +29,14 @@ note sur 5 avec le nombre d'avis.
 - **Ajout au panier :** Présence du bouton pour ajouter l'article au panier avec le feedback visuel
 (toast)
 
-![La page de détails](img/2-details.png)
+![La page de détails](img/2-details.webp)
 
 ### Gestion du panier
 
 - **Visualisation :** Récapitulatif des articles ajoutés avec leur quantité et prix unitaire.
 - **Suppression :** Possibilité de retirer un ou plusieurs articles du panier.
 
-![La page du panier](img/3-panier.png)
+![La page du panier](img/3-panier.webp)
 
 ### Processus de commande
 
@@ -46,20 +46,20 @@ simulation d'un petit délai de traitement réseau, puis validation visuelle et 
 l'accueil après succès.
 - **Notification :** Envoi d'une notification locale confirmant la validation de la commande.
 
-![La page 1 de commande](img/4-commande.png)
+![La page 1 de commande](img/4-commande.webp)
 
-![La page 2 de commande](img/5-paiement.png)
+![La page 2 de commande](img/5-paiement.webp)
 
-![La page 3 de commande](img/6-confirmation.jpg)
+![La page 3 de commande](img/6-confirmation.webp)
 
-![La notification](img/7-notification.jpg)
+![La notification](img/7-notification.webp)
 
 ### Historique
 
 - **Consultation :** Liste des commandes passées (celles ayant eu un paiement validé).
 - **Détail de chaque commande :** Date, liste des produits achetés et prix total.
 
-![La page d'historique](img/8-historique.png)
+![La page d'historique](img/8-historique.webp)
 
 ## 🛠️ Implémentation technique
 
