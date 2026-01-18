@@ -80,7 +80,6 @@ class PaiementActivity : ComponentActivity() {
 					val notificationPermissionLauncher = rememberLauncherForActivityResult(
 						contract = ActivityResultContracts.RequestPermission(),
 						onResult = { isGranted ->
-							// Ici on peut loguer si l'utilisateur a accepté ou refusé
 							if (isGranted) {
 								println("Permission accordée !")
 							} else {
@@ -89,7 +88,6 @@ class PaiementActivity : ComponentActivity() {
 						}
 					)
 
-					// 2. On demande la permission au lancement de l'écran (si Android 13+)
 					LaunchedEffect(Unit) {
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 							val permissionStatus = ContextCompat.checkSelfPermission(
@@ -106,13 +104,11 @@ class PaiementActivity : ComponentActivity() {
 							lifecycleScope.launch {
 								viewModel.validateOrder()
 
-								// Retour à l'accueil en vidant la pile d'activités
 								val intent = Intent(this@PaiementActivity, MainActivity::class.java)
 								intent.flags =
 									Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
 								startActivity(intent)
 
-								//Envoi notification
 								sendNotification(context)
 								finish()
 							}
@@ -151,13 +147,11 @@ private fun sendNotification(context: Context) {
 
 @Composable
 fun PaymentScreen(onPaymentSuccess: () -> Unit) {
-	// États du formulaire
 	var cardNumber by remember { mutableStateOf("") }
 	var cardHolder by remember { mutableStateOf("") }
 	var expiryDate by remember { mutableStateOf("") }
 	var cvv by remember { mutableStateOf("") }
 
-	// États de l'interface (Chargement / Succès)
 	var isLoading by remember { mutableStateOf(false) }
 	var isSuccess by remember { mutableStateOf(false) }
 
@@ -268,6 +262,7 @@ fun PaymentScreen(onPaymentSuccess: () -> Unit) {
 					scope.launch {
 						delay(2500)
 						isLoading = false
+						isSuccess = true
 					}
 				},
 				enabled = !isLoading && cardNumber.length == 16 && expiryDate.length == 4 && cvv.length == 3,

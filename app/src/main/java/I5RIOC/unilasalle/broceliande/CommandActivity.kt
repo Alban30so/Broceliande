@@ -88,7 +88,7 @@ fun CommandFormScreen(onBack: () -> Unit, onPayment: () -> Unit) {
 			},
 			label = { Text("Nom") },
 			modifier = Modifier.fillMaxWidth(),
-			singleLine = true,
+			singleLine = true
 		)
 
 		OutlinedTextField(

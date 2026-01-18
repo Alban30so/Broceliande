@@ -3,6 +3,7 @@ package I5RIOC.unilasalle.broceliande
 import I5RIOC.unilasalle.broceliande.model.MainViewModel
 import I5RIOC.unilasalle.broceliande.model.OrderWithItems
 import I5RIOC.unilasalle.broceliande.ui.theme.BroceliandeTheme
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -87,6 +88,7 @@ fun OrderHistoryScreen(orders: List<OrderWithItems>) {
 	}
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun OrderItemCard(orderWithItems: OrderWithItems) {
 	val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())

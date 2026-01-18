@@ -91,7 +91,6 @@ fun ProductDetailScreen(product: Product) {
 			.verticalScroll(rememberScrollState())
 			.padding(16.dp)
 	) {
-		// Image du produit
 		AsyncImage(
 			model = product.image,
 			contentDescription = product.title,
@@ -103,7 +102,6 @@ fun ProductDetailScreen(product: Product) {
 
 		Spacer(modifier = Modifier.height(24.dp))
 
-		// Titre et Catégorie
 		Text(
 			text = product.category.uppercase(),
 			style = MaterialTheme.typography.labelLarge,
@@ -117,7 +115,6 @@ fun ProductDetailScreen(product: Product) {
 
 		Spacer(modifier = Modifier.height(16.dp))
 
-		// Prix et Note
 		Row(
 			modifier = Modifier.fillMaxWidth(),
 			horizontalArrangement = Arrangement.SpaceBetween
@@ -140,7 +137,6 @@ fun ProductDetailScreen(product: Product) {
 
 		HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
-		// Description
 		Text(
 			text = "Description",
 			style = MaterialTheme.typography.titleMedium,
