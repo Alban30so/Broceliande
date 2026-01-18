@@ -70,7 +70,7 @@ class ProductDetailsActivity : ComponentActivity() {
 									viewModel.addToCart(it)
 									ToastHelper.showShortToast(
 										applicationContext,
-										"Ajouté au panier"
+										"Ajouté au panier ✨"
 									)
 								},
 								backgroundColor = MaterialTheme.colorScheme.primary
